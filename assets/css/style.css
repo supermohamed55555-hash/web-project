@@ -1,0 +1,234 @@
+ /* =========================================
+   DESIGN SYSTEM & VARIABLES
+   ========================================= */
+:root {
+    --primary: #D32F2F;
+    --primary-hover: #B71C1C;
+    --secondary: #FFEBEE;
+    --accent: #2ECC71;
+    --text-dark: #2D3436;
+    --text-muted: #636E72;
+    --bg-light: #F8F9FA;
+    --white: #FFFFFF;
+    
+    /* Spacing & Effects */
+    --space-lg: 5rem;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+a { text-decoration: none; color: inherit; transition: var(--transition); }
+ul { list-style: none; }
+
+/* Accessibility */
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+/* =========================================
+   REUSABLE UTILITY CLASSES
+   ========================================= */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+.text-center { text-align: center; }
+.section-padding { padding: var(--space-lg) 0; }
+
+.section-title { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--text-dark); }
+.section-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 3rem; }
+
+.btn { display: inline-block; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none; }
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3); background: var(--primary-hover); }
+.btn-outline { border: 2px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary); color: var(--white); }
+
+/* =========================================
+   NAVBAR
+   ========================================= */
+.navbar { background: var(--white); height: 80px; display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); }
+.nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-link.active { color: var(--primary); font-weight: 700; }
+.nav-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); }
+
+/* =========================================
+   HERO & SECTIONS
+   ========================================= */
+.hero { background: linear-gradient(135deg, #fff 0%, #fff5f5 100%); min-height: 80vh; display: flex; align-items: center; }
+.hero h1 { font-size: 3.5rem; line-height: 1.2; margin-bottom: 1.5rem; }
+.hero h1 span { color: var(--primary); }
+.hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem; max-width: 600px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: -60px; }
+.stat-card { background: var(--white); padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; }
+.stat-card h3 { font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem; }
+
+/* Reveal Animation Class */
+.reveal { opacity: 0; transform: translateY(30px); transition: var(--transition); }
+.reveal.active { opacity: 1; transform: translateY(0); }
+
+/* =========================================
+   FOOTER
+   ========================================= */
+footer { background: #2d3436; color: white; padding: 4rem 0 2rem; }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; }
+.footer-bottom { border-top: 1px solid #444; margin-top: 3rem; padding-top: 2rem; text-align: center; color: #b2bec3; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-toggle { display: block; }
+    .nav-links { position: absolute; top: 80px; left: 0; width: 100%; background: var(--white); flex-direction: column; padding: 2rem; display: none; box-shadow: var(--shadow); }
+    .nav-links.active { display: flex; }
+    .hero h1 { font-size: 2.5rem; }
+}
+
+/* =========================================
+   FORMS & AUTH PAGES
+   ========================================= */
+.auth-container {
+    min-height: calc(100vh - 160px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) 0;
+}
+
+.auth-card {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 500px;
+}
+
+.auth-card h2 {
+    margin-bottom: 2rem;
+    color: var(--primary);
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.alert-error { background: #fee2e2; color: #991b1b; }
+.alert-success { background: #dcfce7; color: #166534; }
+
+/* =========================================
+   DARK MODE SUPPORT
+   ========================================= */
+body.dark-theme {
+    --bg-light: #121212;
+    --white: #1e1e1e;
+    --text-dark: #e0e0e0;
+    --text-muted: #b0b0b0;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --secondary: #2d1a1a;
+}
+
+.theme-toggle {
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-left: 1.5rem;
+    color: var(--text-dark);
+}
+
+/* =========================================
+   COMPATIBILITY TABLE
+   ========================================= */
+.comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    background: var(--white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.comp-table th, .comp-table td {
+    padding: 1.2rem;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.comp-table th {
+    background: var(--primary);
+    color: white;
+}
+
+.can-receive { background: #e8f5e9; color: #2e7d32; font-weight: bold; }
+.can-donate { background: #ffebee; color: #c62828; font-weight: bold; }
+
+/* =========================================
+   CHARTS & REPORTS
+   ========================================= */
+.charts-section {
+    margin-top: 4rem;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.chart-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.chart-card h4 {
+    margin-bottom: 1.5rem;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
