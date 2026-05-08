@@ -12,15 +12,15 @@ define('DB_PASS', '');
 
 try {
     // Create a new PDO connection
-    $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
-
+    $conn = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    
     // Corrected error mode attribute
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    
     // Set default fetch mode to associative array
     $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
+    
+} catch(PDOException $e) {
     // If connection fails, stop and show error
     die("Connection failed: " . $e->getMessage());
 }

@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start(); 
 }
 // Set your project folder name here
-$project_folder = "blood-donation"; 
+$project_folder = "blood-app"; 
 $base_url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/$project_folder/";
 $current_page = basename($_SERVER['PHP_SELF']); 
 ?>
@@ -28,7 +28,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <ul class="nav-links" id="navLinks">
                 <li><a href="<?= $base_url ?>index.php" class="nav-link <?= $current_page == 'index.php' ? 'active' : '' ?>">Home</a></li>
                 <li><a href="<?= $base_url ?>search.php" class="nav-link <?= $current_page == 'search.php' ? 'active' : '' ?>">Find Donors</a></li>
-                <li><a href="<?= $base_url ?>map-search.php" class="nav-link <?= $current_page == 'map-search.php' ? 'active' : '' ?>">Map Search</a></li>
+                <li><a href="<?= $base_url ?>map-view.php" class="nav-link <?= $current_page == 'map-view.php' ? 'active' : '' ?>">Map</a></li>
                 
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a href="<?= $base_url ?>dashboard.php" class="nav-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">Dashboard</a></li>

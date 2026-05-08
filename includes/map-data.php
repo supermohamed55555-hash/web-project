@@ -2,8 +2,6 @@
 require_once '../config.php';
 
 header('Content-Type: application/json');
-
-try {
 try {
     // 1. Fetch Blood Requests (Public Data)
     $stmt1 = $conn->prepare("SELECT br.*, u.full_name as patient_name, 'request' as type 

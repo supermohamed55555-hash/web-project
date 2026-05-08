@@ -12,25 +12,34 @@ include 'includes/header.php';
 $message = "";
 $messageType = "";
 
+// The "Fixed" Hospital List for Aswan
+$hospitals = [
+    ['name' => 'مستشفى حميات أسوان (المسلة)', 'lat' => 24.0845, 'lng' => 32.8988],
+    ['name' => 'مستشفى أسوان الجامعي', 'lat' => 24.0881, 'lng' => 32.8997],
+    ['name' => 'مركز مجدي يعقوب للقلب', 'lat' => 24.0883, 'lng' => 32.8990],
+    ['name' => 'مستشفى أسوان التخصصي', 'lat' => 24.1166, 'lng' => 32.9015],
+    ['name' => 'مستشفى الهلال الأحمر', 'lat' => 24.0874, 'lng' => 32.9021]
+];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $blood_type = $_POST['blood_type'];
-    $hospital   = trim($_POST['hospital_name']);
-    $city       = trim($_POST['city']);
+    $hospital_index = $_POST['hospital_index'];
     $msg        = trim($_POST['message']);
-    $lat        = !empty($_POST['lat']) ? $_POST['lat'] : null;
-    $lng        = !empty($_POST['lng']) ? $_POST['lng'] : null;
     $user_id    = $_SESSION['user_id'];
 
-    if (empty($blood_type) || empty($hospital) || empty($city)) {
-        $message = "Please fill in all required fields.";
-        $messageType = "error";
-    } else {
+    if (isset($hospitals[$hospital_index])) {
+        $h_info = $hospitals[$hospital_index];
+        $hospital_name = $h_info['name'];
+        $latitude = $h_info['lat'];
+        $longitude = $h_info['lng'];
+        $city = "Aswan";
+
         try {
             $stmt = $conn->prepare("INSERT INTO blood_requests (user_id, blood_type, hospital_name, city, message, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$user_id, $blood_type, $hospital, $city, $msg, $lat, $lng]);
-            
-            $message = "Blood request posted successfully! <a href='map-search.php' style='color: white; text-decoration: underline;'>View it on the Map</a>";
-            $messageType = "success";
+            if ($stmt->execute([$user_id, $blood_type, $hospital_name, $city, $msg, $latitude, $longitude])) {
+                $message = "تم نشر الطلب بنجاح في مكان المستشفى المختار! <a href='map-view.php'>شاهده على الخريطة</a>";
+                $messageType = "success";
+            }
         } catch (PDOException $e) {
             $message = "Error: " . $e->getMessage();
             $messageType = "error";
@@ -39,70 +48,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<div class="auth-container">
-    <div class="auth-card reveal">
-        <h2>Post Blood Request</h2>
-        
-        <?php if ($message): ?>
-            <div class="alert alert-<?= $messageType ?>">
-                <?= $message ?>
-            </div>
-        <?php endif; ?>
-
-        <form action="request-blood.php" method="POST">
-            <div class="form-group">
-                <label>Required Blood Type</label>
-                <select name="blood_type" class="form-control" required>
-                    <option value="">Select Blood Type</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                </select>
-            </div>
+<div class="section-padding" dir="rtl">
+    <div class="container" style="max-width: 600px;">
+        <div class="auth-card reveal" style="background: var(--white); padding: 2.5rem; border-radius: 15px; box-shadow: var(--shadow); text-align: right;">
+            <h2 class="text-center" style="color: var(--primary); margin-bottom: 2rem;">نشر طلب تبرع عاجل</h2>
             
-            <div class="form-group">
-                <label>Hospital Name</label>
-                <input type="text" name="hospital_name" class="form-control" placeholder="e.g. City General Hospital" required>
-            </div>
+            <?php if ($message): ?>
+                <div class="alert" style="padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; background: <?= $messageType == 'success' ? '#d4edda' : '#f8d7da' ?>; color: <?= $messageType == 'success' ? '#155724' : '#721c24' ?>; text-align: center;">
+                    <?= $message ?>
+                </div>
+            <?php endif; ?>
 
-            <div class="form-group">
-                <label>City / Area</label>
-                <input type="text" name="city" class="form-control" placeholder="Where is the hospital located?" required>
-            </div>
-
-            <div class="form-group">
-                <label>Additional Message (Optional)</label>
-                <textarea name="message" class="form-control" rows="3" placeholder="Tell us more (e.g. Surgery date, units needed)"></textarea>
-            </div>
-
-            <!-- Hidden Location Fields -->
-            <input type="hidden" name="lat" id="lat">
-            <input type="hidden" name="lng" id="lng">
-
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Request</button>
-            <a href="dashboard.php" class="btn" style="width: 100%; text-align: center; margin-top: 1rem;">Back to Dashboard</a>
-        </form>
+            <form method="POST">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">فصيلة الدم المطلوبة</label>
+                    <select name="blood_type" class="form-control" required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="">اختر الفصيلة</option>
+                        <option value="A+">A+</option><option value="A-">A-</option>
+                        <option value="B+">B+</option><option value="B-">B-</option>
+                        <option value="O+">O+</option><option value="O-">O-</option>
+                        <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">اختر المستشفى (مكان الحالة)</label>
+                    <select name="hospital_index" class="form-control" required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="">-- اختر المستشفى --</option>
+                        <?php foreach ($hospitals as $index => $h): ?>
+                            <option value="<?= $index ?>"><?= $h['name'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">رسالة إضافية</label>
+                    <textarea name="message" class="form-control" rows="3" placeholder="مثال: محتاجين 3 أكياس دم فورا.." style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd;"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;">نشر الطلب الآن</button>
+            </form>
+        </div>
     </div>
 </div>
-
-<script>
-    // Get user location when the page loads
-    window.onload = function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                document.getElementById('lat').value = position.coords.latitude;
-                document.getElementById('lng').value = position.coords.longitude;
-                console.log("Location captured:", position.coords.latitude, position.coords.longitude);
-            }, function(error) {
-                console.warn("Location access denied or error:", error.message);
-            });
-        }
-    };
-</script>
 
 <?php include 'includes/footer.php'; ?>
