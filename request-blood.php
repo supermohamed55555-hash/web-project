@@ -17,6 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hospital   = trim($_POST['hospital_name']);
     $city       = trim($_POST['city']);
     $msg        = trim($_POST['message']);
+    $lat        = !empty($_POST['lat']) ? $_POST['lat'] : null;
+    $lng        = !empty($_POST['lng']) ? $_POST['lng'] : null;
     $user_id    = $_SESSION['user_id'];
 
     if (empty($blood_type) || empty($hospital) || empty($city)) {
@@ -24,10 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $messageType = "error";
     } else {
         try {
-            $stmt = $conn->prepare("INSERT INTO blood_requests (user_id, blood_type, hospital_name, city, message) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$user_id, $blood_type, $hospital, $city, $msg]);
+            $stmt = $conn->prepare("INSERT INTO blood_requests (user_id, blood_type, hospital_name, city, message, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$user_id, $blood_type, $hospital, $city, $msg, $lat, $lng]);
             
-            $message = "Blood request posted successfully!";
+            $message = "Blood request posted successfully! <a href='map-search.php' style='color: white; text-decoration: underline;'>View it on the Map</a>";
             $messageType = "success";
         } catch (PDOException $e) {
             $message = "Error: " . $e->getMessage();
@@ -78,10 +80,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <textarea name="message" class="form-control" rows="3" placeholder="Tell us more (e.g. Surgery date, units needed)"></textarea>
             </div>
 
+            <!-- Hidden Location Fields -->
+            <input type="hidden" name="lat" id="lat">
+            <input type="hidden" name="lng" id="lng">
+
             <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Request</button>
             <a href="dashboard.php" class="btn" style="width: 100%; text-align: center; margin-top: 1rem;">Back to Dashboard</a>
         </form>
     </div>
 </div>
+
+<script>
+    // Get user location when the page loads
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('lat').value = position.coords.latitude;
+                document.getElementById('lng').value = position.coords.longitude;
+                console.log("Location captured:", position.coords.latitude, position.coords.longitude);
+            }, function(error) {
+                console.warn("Location access denied or error:", error.message);
+            });
+        }
+    };
+</script>
 
 <?php include 'includes/footer.php'; ?>

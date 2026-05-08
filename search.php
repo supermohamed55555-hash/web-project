@@ -62,29 +62,21 @@ if (isset($_GET['blood_type']) || isset($_GET['city'])) {
     </div>
 
     <!-- Results -->
-    <div class="footer-grid">
+    <div class="footer-grid" style="grid-template-columns: 1fr;">
         <?php if ($searched): ?>
             <?php if (count($results) > 0): ?>
-                <?php foreach ($results as $donor): ?>
-                    <div class="stat-card reveal" style="text-align: left; padding: 2rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <h3 style="font-size: 1.5rem; margin: 0; color: var(--text-dark);"><?= htmlspecialchars($donor['full_name']) ?></h3>
-                                <p style="color: var(--text-muted); margin-bottom: 1rem;"><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($donor['city']) ?></p>
-                            </div>
-                            <span style="background: var(--primary); color: white; padding: 5px 15px; border-radius: 50px; font-weight: bold; font-size: 1.2rem;">
-                                <?= $donor['blood_type'] ?>
-                            </span>
-                        </div>
-                        <a href="tel:<?= $donor['phone'] ?>" class="btn btn-outline" style="width: 100%; text-align: center; margin-top: 1rem;">
-                            <i class="fas fa-phone"></i> Call Donor
-                        </a>
-                    </div>
-                <?php endforeach; ?>
+                <div class="stat-card reveal" style="text-align: center; padding: 3rem; background: rgba(76, 175, 80, 0.1); border: 2px solid #4CAF50;">
+                    <i class="fas fa-check-circle fa-4x" style="color: #4CAF50; margin-bottom: 1.5rem;"></i>
+                    <h3 style="font-size: 2rem; color: #2e7d32; margin-bottom: 1rem;">Available Donors Found!</h3>
+                    <p style="font-size: 1.2rem; color: #444;">We found <strong><?= count($results) ?></strong> donors matching <strong><?= htmlspecialchars($blood_type ?: 'any blood type') ?></strong> in <strong><?= htmlspecialchars($city ?: 'all areas') ?></strong>.</p>
+                    <p style="margin-top: 2rem; font-style: italic; color: var(--text-muted);">For privacy reasons, donor details are kept secure. Please <a href="request-blood.php" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Post a Request</a> to notify them.</p>
+                </div>
             <?php else: ?>
-                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-                    <i class="fas fa-search fa-3x" style="color: #ddd; margin-bottom: 1rem;"></i>
-                    <p>No donors found matching your criteria.</p>
+                <div class="stat-card reveal" style="text-align: center; padding: 3rem; background: rgba(244, 67, 54, 0.1); border: 2px solid var(--primary);">
+                    <i class="fas fa-times-circle fa-4x" style="color: var(--primary); margin-bottom: 1.5rem;"></i>
+                    <h3 style="font-size: 2rem; color: #c62828; margin-bottom: 1rem;">No Donors Available Currently</h3>
+                    <p style="font-size: 1.2rem; color: #444;">We couldn't find any donors matching your criteria at this moment.</p>
+                    <p style="margin-top: 2rem;"><a href="search.php" class="btn btn-outline">Try another search</a></p>
                 </div>
             <?php endif; ?>
         <?php else: ?>
