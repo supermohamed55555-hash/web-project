@@ -1,6 +1,10 @@
 {
     "require": {
-        "php": "^8.0",
         "ext-pdo_mysql": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
     }
 }
