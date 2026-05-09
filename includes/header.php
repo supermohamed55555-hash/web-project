@@ -34,9 +34,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li><a href="<?= $base_url ?>map-view.php" class="nav-link <?= $current_page == 'map-view.php' ? 'active' : '' ?>">الخريطة</a></li>
                 
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="<?= $base_url ?>dashboard.php" class="nav-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">لوحة التحكم</a></li>
+                    <li><a href="<?= $base_url ?>dashboard.php" class="nav-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">حسابي</a></li>
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
-                        <li><a href="<?= $base_url ?>admin/dashboard.php" class="nav-link">لوحة التحكم</a></li>
+                        <li><a href="<?= $base_url ?>admin/dashboard.php" class="nav-link" style="color: #e53935; font-weight: bold;">لوحة الإدارة</a></li>
                     <?php endif; ?>
                     <li><a href="<?= $base_url ?>logout.php" class="btn btn-outline" style="padding: 0.5rem 1.2rem;">تسجيل الخروج</a></li>
                 <?php else: ?>
