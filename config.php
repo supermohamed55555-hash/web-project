@@ -5,12 +5,12 @@
  */
 
 // Database credentials
-// Database credentials with Environment Variables support for Railway
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'lifestream_db');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
-define('DB_PORT', getenv('DB_PORT') ?: '3306');
+// Database credentials - Supports Railway defaults and local XAMPP
+define('DB_HOST', getenv('MYSQLHOST') ?: (getenv('DB_HOST') ?: 'localhost'));
+define('DB_NAME', getenv('MYSQLDATABASE') ?: (getenv('DB_NAME') ?: 'lifestream_db'));
+define('DB_USER', getenv('MYSQLUSER') ?: (getenv('DB_USER') ?: 'root'));
+define('DB_PASS', getenv('MYSQLPASSWORD') ?: (getenv('DB_PASS') ?: ''));
+define('DB_PORT', getenv('MYSQLPORT') ?: (getenv('DB_PORT') ?: '3306'));
 
 try {
     // Create a new PDO connection
