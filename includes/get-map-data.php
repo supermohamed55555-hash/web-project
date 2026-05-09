@@ -1,14 +1,25 @@
 <?php
 require_once '../config.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // Fetch pending requests that have coordinates
-    $stmt = $conn->prepare("SELECT br.blood_type, br.hospital_name, br.latitude, br.longitude, br.message, u.full_name 
-                            FROM blood_requests br 
-                            JOIN users u ON br.user_id = u.id 
-                            WHERE br.status = 'Pending' AND br.latitude IS NOT NULL");
+    // DYNAMIC SYNC: Join blood_requests with hospitals to get the VERIFIED coordinates
+    $stmt = $conn->prepare("
+        SELECT 
+            br.blood_type, 
+            br.message, 
+            br.hospital_name,
+            u.full_name, 
+            h.latitude, 
+            h.longitude,
+            h.name_ar as official_name
+        FROM blood_requests br 
+        INNER JOIN hospitals h ON br.hospital_id = h.id
+        INNER JOIN users u ON br.user_id = u.id 
+        WHERE br.status = 'Pending'
+    ");
+    
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
