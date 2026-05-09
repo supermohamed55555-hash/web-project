@@ -1,194 +1,110 @@
-<?php 
+<?php
 session_start();
 require_once '../config.php';
 
-// SECURITY: Only allow Admins
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 'admin') {
-    header("Location: ../index.php");
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.php");
     exit();
 }
 
-include '../includes/header.php';
-
-// Stats
-$total_users = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $total_requests = $conn->query("SELECT COUNT(*) FROM blood_requests")->fetchColumn();
+$pending_requests = $conn->query("SELECT COUNT(*) FROM blood_requests WHERE status = 'Pending'")->fetchColumn();
+$total_users = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$total_hospitals = $conn->query("SELECT COUNT(*) FROM hospitals")->fetchColumn();
 
-// Data for Blood Type Chart
-$blood_types_query = $conn->query("SELECT blood_type, COUNT(*) as count FROM blood_requests GROUP BY blood_type ORDER BY count DESC");
-$blood_data = $blood_types_query->fetchAll();
-
-$blood_labels = [];
-$blood_counts = [];
-foreach ($blood_data as $row) {
-    $blood_labels[] = $row['blood_type'];
-    $blood_counts[] = $row['count'];
-}
-
-// Data for New Users Chart (Last 7 Days)
-$users_query = $conn->query("
-    SELECT DATE(created_at) as date, COUNT(*) as count 
-    FROM users 
-    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-    GROUP BY DATE(created_at) 
-    ORDER BY date ASC
-");
-$users_data = $users_query->fetchAll();
-
-$user_labels = [];
-$user_counts = [];
-
-// Fill in missing days with 0
-for ($i = 6; $i >= 0; $i--) {
-    $date = date('Y-m-d', strtotime("-$i days"));
-    $user_labels[] = date('M d', strtotime($date));
-    $found = false;
-    foreach ($users_data as $row) {
-        if ($row['date'] == $date) {
-            $user_counts[] = $row['count'];
-            $found = true;
-            break;
-        }
-    }
-    if (!$found) $user_counts[] = 0;
-}
+$recent_stmt = $conn->query("SELECT br.*, u.full_name FROM blood_requests br JOIN users u ON br.user_id = u.id ORDER BY br.created_at DESC LIMIT 5");
+$recent_requests = $recent_stmt->fetchAll();
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم | لايف ستريم</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --sidebar-bg: #1a1a2e; --accent: #e53935; }
+        body { background: #f4f7fe; font-family: 'Inter', 'Cairo', sans-serif; display: flex; }
+        .sidebar { width: 280px; height: 100vh; background: var(--sidebar-bg); color: white; padding: 2rem; position: fixed; right: 0; top: 0; }
+        .main-content { margin-right: 280px; width: 100%; padding: 2rem; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 1rem; }
+        .admin-nav-link { display: flex; align-items: center; gap: 0.8rem; color: #a0aec0; text-decoration: none; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; transition: 0.3s; }
+        .admin-nav-link:hover, .admin-nav-link.active { background: rgba(255,255,255,0.1); color: white; }
+        .table-card { background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #edf2f7; }
+        .badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
+        .badge-pending { background: #fff5f5; color: #e53935; }
+    </style>
+</head>
+<body>
 
-<div class="container section-padding">
-    <div class="reveal">
-        <h2 class="section-title">Admin Console</h2>
-        <p class="section-subtitle">Manage system users and monitoring activity.</p>
+<div class="sidebar">
+    <h2 style="margin-bottom: 2rem; color: var(--accent);">لايف ستريم - الإدارة</h2>
+    <nav>
+        <a href="dashboard.php" class="admin-nav-link active"><i class="fas fa-home"></i> الإحصائيات</a>
+        <a href="requests.php" class="admin-nav-link"><i class="fas fa-heartbeat"></i> طلبات الدم</a>
+        <a href="hospitals.php" class="admin-nav-link"><i class="fas fa-hospital"></i> المستشفيات</a>
+        <a href="users.php" class="admin-nav-link"><i class="fas fa-users"></i> المستخدمين</a>
+        <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 1rem 0;">
+        <a href="../index.php" class="admin-nav-link"><i class="fas fa-external-link-alt"></i> عرض الموقع</a>
+        <a href="../logout.php" class="admin-nav-link" style="color: #fc8181;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>لوحة التحكم الأساسية</h1>
+        <div style="background: white; padding: 0.5rem 1rem; border-radius: 10px;">أهلاً بك، <b>الأدمن</b></div>
+    </header>
+
+    <div class="grid-stats">
+        <div class="stat-card">
+            <div style="background: #eef2ff; color: #4f46e5; padding: 1rem; border-radius: 10px;"><i class="fas fa-users"></i></div>
+            <div><p style="color: #718096; margin: 0;">إجمالي المستخدمين</p><h3><?= $total_users ?></h3></div>
+        </div>
+        <div class="stat-card">
+            <div style="background: #fff5f5; color: #e53935; padding: 1rem; border-radius: 10px;"><i class="fas fa-tint"></i></div>
+            <div><p style="color: #718096; margin: 0;">طلبات الدم</p><h3><?= $total_requests ?></h3></div>
+        </div>
+        <div class="stat-card">
+            <div style="background: #fffaf0; color: #d69e2e; padding: 1rem; border-radius: 10px;"><i class="fas fa-clock"></i></div>
+            <div><p style="color: #718096; margin: 0;">طلبات معلقة</p><h3><?= $pending_requests ?></h3></div>
+        </div>
+        <div class="stat-card">
+            <div style="background: #f0fff4; color: #38a169; padding: 1rem; border-radius: 10px;"><i class="fas fa-hospital"></i></div>
+            <div><p style="color: #718096; margin: 0;">المستشفيات</p><h3><?= $total_hospitals ?></h3></div>
+        </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card reveal">
-            <h3><?= $total_users ?></h3>
-            <p>Total Registered Users</p>
-        </div>
-        <div class="stat-card reveal">
-            <h3><?= $total_requests ?></h3>
-            <p>Total Blood Requests</p>
-        </div>
-    </div>
-
-    <div class="footer-grid" style="margin-top: 3rem;">
-        <div class="auth-card reveal" style="max-width: 100%;">
-            <h3>User Management</h3>
-            <p>View and manage all registered users.</p>
-            <a href="manage-users.php" class="btn btn-primary" style="margin-top: 1rem; display: block; text-align: center;">Go to Users</a>
-        </div>
-        <div class="auth-card reveal" style="max-width: 100%;">
-            <h3>Request Management</h3>
-            <p>Update status of blood requests.</p>
-            <a href="manage-requests.php" class="btn btn-outline" style="margin-top: 1rem; display: block; text-align: center;">Go to Requests</a>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="charts-section reveal">
-        <h2 class="section-title">Reports & Analytics</h2>
-        <p class="section-subtitle">Visual overview of system performance.</p>
-        
-        <div class="charts-grid">
-            <!-- Blood Type Chart -->
-            <div class="chart-card">
-                <h4><i class="fas fa-tint" style="color: var(--primary);"></i> Most Requested Blood Types</h4>
-                <div class="chart-container">
-                    <canvas id="bloodTypeChart"></canvas>
-                </div>
-            </div>
-
-            <!-- New Users Chart -->
-            <div class="chart-card">
-                <h4><i class="fas fa-users" style="color: var(--accent);"></i> New Users (Last 7 Days)</h4>
-                <div class="chart-container">
-                    <canvas id="userGrowthChart"></canvas>
-                </div>
-            </div>
-        </div>
+    <div class="table-card">
+        <h3>أحدث طلبات الدم</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>المريض</th>
+                    <th>الفصيلة</th>
+                    <th>المستشفى</th>
+                    <th>التاريخ</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($recent_requests as $req): ?>
+                <tr>
+                    <td><?= htmlspecialchars($req['full_name']) ?></td>
+                    <td><b style="color: var(--accent);"><?= $req['blood_type'] ?></b></td>
+                    <td><?= htmlspecialchars($req['hospital_name']) ?></td>
+                    <td><?= date('Y-m-d', strtotime($req['created_at'])) ?></td>
+                    <td><span class="badge badge-pending"><?= $req['status'] ?></span></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const isDark = document.body.classList.contains('dark-theme');
-    const textColor = isDark ? '#e0e0e0' : '#2D3436';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-
-    // Blood Type Chart
-    const ctxBlood = document.getElementById('bloodTypeChart').getContext('2d');
-    new Chart(ctxBlood, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($blood_labels) ?>,
-            datasets: [{
-                label: 'Requests',
-                data: <?= json_encode($blood_counts) ?>,
-                backgroundColor: 'rgba(211, 47, 47, 0.7)',
-                borderColor: '#D32F2F',
-                borderWidth: 2,
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: gridColor },
-                    ticks: { color: textColor }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: textColor }
-                }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-
-    // User Growth Chart
-    const ctxUsers = document.getElementById('userGrowthChart').getContext('2d');
-    new Chart(ctxUsers, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($user_labels) ?>,
-            datasets: [{
-                label: 'New Users',
-                data: <?= json_encode($user_counts) ?>,
-                backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                borderColor: '#2ECC71',
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#2ECC71'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: gridColor },
-                    ticks: { color: textColor, stepSize: 1 }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: textColor }
-                }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-});
-</script>
-
-<?php include '../includes/footer.php'; ?>
+</body>
+</html>

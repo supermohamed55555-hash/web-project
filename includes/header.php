@@ -3,8 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start(); 
 }
 // Set your project folder name here
-$project_folder = "web-project-main"; 
-$base_url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/$project_folder/";
+$project_folder = basename(dirname(__DIR__)); 
+$base_url = "http://" . $_SERVER['HTTP_HOST'] . "/" . $project_folder . "/";
 $current_page = basename($_SERVER['PHP_SELF']); 
 ?>
 <!DOCTYPE html>
@@ -35,8 +35,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a href="<?= $base_url ?>dashboard.php" class="nav-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">لوحة التحكم</a></li>
-                    <?php if ($_SESSION['user_role'] == 'admin'): ?>
-                        <li><a href="<?= $base_url ?>admin/dashboard.php" class="nav-link" style="color: var(--accent);">الإدارة</a></li>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
+                        <li><a href="<?= $base_url ?>admin/dashboard.php" class="nav-link">لوحة التحكم</a></li>
                     <?php endif; ?>
                     <li><a href="<?= $base_url ?>logout.php" class="btn btn-outline" style="padding: 0.5rem 1.2rem;">تسجيل الخروج</a></li>
                 <?php else: ?>
