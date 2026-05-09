@@ -4,7 +4,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 // Set your project folder name here
 $project_folder = basename(dirname(__DIR__)); 
-$base_url = "http://" . $_SERVER['HTTP_HOST'] . "/" . $project_folder . "/";
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+$host = $_SERVER['HTTP_HOST'];
+
+// If we are on localhost, we usually need the subfolder. On production (Railway), we are at the root.
+if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) {
+    $base_url = $protocol . "://" . $host . "/" . $project_folder . "/";
+} else {
+    $base_url = $protocol . "://" . $host . "/";
+}
 $current_page = basename($_SERVER['PHP_SELF']); 
 ?>
 <!DOCTYPE html>
