@@ -26,19 +26,20 @@ $requests = $conn->query("SELECT br.*, u.full_name FROM blood_requests br JOIN u
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Requests | Admin</title>
+    <title>إدارة الطلبات | الإدارة</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #f4f7fe; font-family: 'Inter', sans-serif; display: flex; }
-        .sidebar { width: 280px; height: 100vh; background: #1a1a2e; color: white; padding: 2rem; position: fixed; right: 0; }
+        :root { --sidebar-bg: #1a1a2e; --accent: #e53935; }
+        body { background: #f4f7fe; font-family: 'Cairo', sans-serif; display: flex; }
+        .sidebar { width: 280px; height: 100vh; background: var(--sidebar-bg); color: white; padding: 2rem; position: fixed; right: 0; top: 0; }
         .main-content { margin-right: 280px; width: 100%; padding: 2rem; }
         .admin-nav-link { display: flex; align-items: center; gap: 0.8rem; color: #a0aec0; text-decoration: none; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; transition: 0.3s; }
         .admin-nav-link:hover, .admin-nav-link.active { background: rgba(255,255,255,0.1); color: white; }
-        .table-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { padding: 1.2rem; text-align: right; border-bottom: 1px solid #edf2f7; }
-        .btn-sm { padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; margin-left: 5px; }
+        .card { background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #edf2f7; }
+        .btn-sm { padding: 0.4rem 0.8rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; margin-left: 5px; cursor: pointer; }
         .btn-complete { background: #f0fff4; color: #38a169; border: 1px solid #38a169; }
         .btn-delete { background: #fff5f5; color: #e53935; border: 1px solid #e53935; }
         .badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
@@ -49,24 +50,23 @@ $requests = $conn->query("SELECT br.*, u.full_name FROM blood_requests br JOIN u
 <body>
 
 <div class="sidebar">
-    <h2 style="margin-bottom: 2rem; color: #e53935;">LifeStream Admin</h2>
+    <h2 style="margin-bottom: 2rem; color: var(--accent);">لايف ستريم - الإدارة</h2>
     <nav>
-        <a href="dashboard.php" class="admin-nav-link"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="requests.php" class="admin-nav-link active"><i class="fas fa-heartbeat"></i> Blood Requests</a>
-        <a href="hospitals.php" class="admin-nav-link"><i class="fas fa-hospital"></i> Hospitals</a>
-        <a href="users.php" class="admin-nav-link"><i class="fas fa-users"></i> Users</a>
+        <a href="dashboard.php" class="admin-nav-link"><i class="fas fa-home"></i> الإحصائيات</a>
+        <a href="requests.php" class="admin-nav-link active"><i class="fas fa-heartbeat"></i> طلبات الدم</a>
+        <a href="hospitals.php" class="admin-nav-link"><i class="fas fa-hospital"></i> المستشفيات</a>
+        <a href="users.php" class="admin-nav-link"><i class="fas fa-users"></i> المستخدمين</a>
         <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 1rem 0;">
-        <a href="../index.php" class="admin-nav-link"><i class="fas fa-external-link-alt"></i> View Site</a>
+        <a href="../index.php" class="admin-nav-link"><i class="fas fa-external-link-alt"></i> عرض الموقع</a>
+        <a href="../logout.php" class="admin-nav-link" style="color: #fc8181;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
     </nav>
 </div>
 
 <div class="main-content">
-    <header style="margin-bottom: 2rem;">
-        <h1>إدارة طلبات التبرع بالدم</h1>
-        <p>التحكم الكامل في جميع الاستغاثات المنشورة</p>
-    </header>
+    <h1>إدارة طلبات الدم</h1>
+    <p>يمكنك حذف الطلبات أو تغيير حالتها لمكتملة لتختفي من الخريطة</p>
 
-    <div class="table-card">
+    <div class="card">
         <table>
             <thead>
                 <tr>
@@ -82,11 +82,11 @@ $requests = $conn->query("SELECT br.*, u.full_name FROM blood_requests br JOIN u
                 <?php foreach ($requests as $req): ?>
                 <tr>
                     <td><?= htmlspecialchars($req['full_name']) ?></td>
-                    <td><b style="color: #e53935;"><?= $req['blood_type'] ?></b></td>
+                    <td><b style="color: var(--accent);"><?= $req['blood_type'] ?></b></td>
                     <td><?= htmlspecialchars($req['hospital_name']) ?></td>
                     <td>
                         <span class="badge <?= $req['status'] == 'Pending' ? 'badge-pending' : 'badge-completed' ?>">
-                            <?= $req['status'] ?>
+                            <?= $req['status'] == 'Pending' ? 'معلق' : 'مكتمل' ?>
                         </span>
                     </td>
                     <td><?= date('Y-m-d', strtotime($req['created_at'])) ?></td>
