@@ -69,6 +69,8 @@ ul { list-style: none; }
 /* Reveal Animation Class */
 .reveal { opacity: 0; transform: translateY(30px); transition: var(--transition); }
 .reveal.active { opacity: 1; transform: translateY(0); }
+/* Auth cards should always be visible */
+.auth-card.reveal { opacity: 1; transform: translateY(0); }
 
 /* =========================================
    FOOTER
