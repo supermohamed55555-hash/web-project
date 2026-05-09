@@ -5,15 +5,22 @@ try {
     // 1. Add role column if not exists
     $conn->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user' AFTER password");
     
-    // 2. Make YOUR specific email the Admin
-    $stmt = $conn->prepare("UPDATE users SET role = 'admin' WHERE email = ?");
-    $stmt->execute(['superabdo22222@gmail.com']);
+    // 2. The Admin Emails List
+    $admin_emails = [
+        'superabdo22222@gmail.com',
+        'mhmhmhmhmh770@gmail.com'
+    ];
 
-    if ($stmt->rowCount() > 0) {
-        echo "<h2 style='color: green;'>✅ مبروك! الحساب (superabdo22222@gmail.com) أصبح الآن هو الأدمن.</h2>";
-    } else {
-        echo "<h2 style='color: orange;'>⚠️ الإيميل ده مش موجود في الداتابيز.. تأكد إنك مسجل حساب بالإيميل ده الأول.</h2>";
+    $stmt = $conn->prepare("UPDATE users SET role = 'admin' WHERE email = ?");
+    
+    foreach ($admin_emails as $email) {
+        $stmt->execute([$email]);
     }
+
+    echo "<h2 style='color: green;'>✅ تم تحديث الصلاحيات بنجاح!</h2>";
+    echo "<p>الإيميلات التالية أصبحت أدمن الآن (لو كانت مسجلة في الموقع):</p>";
+    echo "<ul><li>superabdo22222@gmail.com</li><li>mhmhmhmhmh770@gmail.com</li></ul>";
+    
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
