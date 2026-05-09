@@ -15,16 +15,11 @@ try {
 
     // Corrected Precision Coordinates for Aswan Hospitals
     $hospitals = [
-        ['مستشفى أسوان الجامعي', 'Aswan University Hospitals', 'Aswan', 24.0881, 32.8997],
-        ['مستشفى أسوان التخصصي (العام سابقاً)', 'Aswan Specialized Hospital', 'Aswan', 24.1166, 32.9015],
-        ['مستشفى المسلة التخصصي (الحميات)', 'El-Masala Specialized Hospital', 'Aswan', 24.0845, 32.8988],
-        ['مستشفى الجرمانية', 'Evangelical Mission Hospital', 'Aswan', 24.0913, 32.8982],
-        ['مركز مجدي يعقوب للقلب', 'Aswan Heart Centre', 'Aswan', 24.0883, 32.8990],
-        ['مستشفى الهلال الأحمر', 'Red Crescent Hospital', 'Aswan', 24.0874, 32.9021],
-        ['مستشفى رمد أسوان', 'Specialized Hospital of Ophthalmology', 'Aswan', 24.0878, 32.9038],
-        ['مركز أورام أسوان', 'Aswan Oncology Center', 'Aswan', 24.0941, 32.8915],
-        ['مستشفى الاستقبال والطوارئ', 'Emergency Hospital', 'Aswan', 24.0889, 32.8999],
-        ['مستشفى التأمين الصحي بأسوان', 'Aswan Insurance Hospital', 'Aswan', 24.0855, 32.8928]
+        ['مستشفى أسوان الجامعي', 'Aswan University Hospitals', 'Aswan', 24.0874, 32.8974],
+        ['مركز مجدي يعقوب للقلب', 'Aswan Heart Centre', 'Aswan', 24.0838, 32.8864],
+        ['مستشفى أسوان التخصصي', 'Aswan Specialized Hospital', 'Aswan', 24.1183, 32.9022],
+        ['مستشفى المسلة التخصصي', 'El-Masala Specialized Hospital', 'Aswan', 24.0848, 32.8965],
+        ['مستشفى الهلال الأحمر', 'Red Crescent Hospital', 'Aswan', 24.0905, 32.8998]
     ];
 
     $stmt = $conn->prepare("INSERT INTO hospitals (name_ar, name_en, city, latitude, longitude) VALUES (?, ?, ?, ?, ?)");

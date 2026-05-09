@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Simple Validation
     if (empty($full_name) || empty($email) || empty($password)) {
-        $message = "Please fill in all required fields.";
+        $message = "يرجى ملء جميع الحقول المطلوبة.";
         $messageType = "error";
     } else {
         // Check if email already exists
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute([$email]);
         
         if ($stmt->rowCount() > 0) {
-            $message = "This email is already registered.";
+            $message = "هذا البريد الإلكتروني مسجل بالفعل.";
             $messageType = "error";
         } else {
             // Hash password and insert user
@@ -35,10 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([$full_name, $email, $hashed_password, $phone, $blood_type, $city]);
                 
-                $message = "Registration successful! You can now login.";
+                $message = "تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.";
                 $messageType = "success";
             } catch (PDOException $e) {
-                $message = "Error: " . $e->getMessage();
+                $message = "خطأ: " . $e->getMessage();
                 $messageType = "error";
             }
         }
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <div class="auth-container">
     <div class="auth-card reveal">
-        <h2>Join LifeStream</h2>
+        <h2>انضم إلى لايف ستريم</h2>
         
         <?php if ($message): ?>
             <div class="alert alert-<?= $messageType ?>">
@@ -58,30 +58,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <form action="register.php" method="POST">
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required>
+                <label>الاسم الكامل</label>
+                <input type="text" name="full_name" class="form-control" placeholder="أدخل اسمك بالكامل" required>
             </div>
             
             <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                <label>البريد الإلكتروني</label>
+                <input type="email" name="email" class="form-control" placeholder="example@mail.com" required>
             </div>
             
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+                <label>كلمة المرور</label>
+                <input type="password" name="password" class="form-control" placeholder="6 أحرف على الأقل" required>
             </div>
 
             <div class="form-group">
-                <label>Phone Number</label>
-                <input type="text" name="phone" class="form-control" placeholder="e.g. 01012345678" required>
+                <label>رقم الهاتف</label>
+                <input type="text" name="phone" class="form-control" placeholder="مثال: 01012345678" required>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label>Blood Type</label>
+                    <label>فصيلة الدم</label>
                     <select name="blood_type" class="form-control" required>
-                        <option value="">Select</option>
+                        <option value="">اختر</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
                         <option value="B+">B+</option>
@@ -93,15 +93,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>City</label>
-                    <input type="text" name="city" class="form-control" placeholder="Your City" required>
+                    <label>المدينة</label>
+                    <input type="text" name="city" class="form-control" placeholder="مدينتك" required>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Account</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">إنشاء حساب</button>
             
             <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
-                Already have an account? <a href="login.php" style="color: var(--primary); font-weight: 600;">Login here</a>
+                لديك حساب بالفعل؟ <a href="login.php" style="color: var(--primary); font-weight: 600;">سجل دخول من هنا</a>
             </p>
         </form>
     </div>

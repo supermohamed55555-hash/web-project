@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     if (empty($email) || empty($password)) {
-        $message = "Please enter both email and password.";
+        $message = "يرجى إدخال البريد الإلكتروني وكلمة المرور.";
         $messageType = "error";
     } else {
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: index.php");
             exit();
         } else {
-            $message = "Invalid email or password.";
+            $message = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
             $messageType = "error";
         }
     }
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <div class="auth-container">
     <div class="auth-card reveal">
-        <h2>Welcome Back</h2>
+        <h2>مرحباً بعودتك</h2>
         
         <?php if ($message): ?>
             <div class="alert alert-<?= $messageType ?>">
@@ -52,19 +52,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <form action="login.php" method="POST">
             <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                <label>البريد الإلكتروني</label>
+                <input type="email" name="email" class="form-control" placeholder="example@mail.com" required>
             </div>
             
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                <label>كلمة المرور</label>
+                <input type="password" name="password" class="form-control" placeholder="أدخل كلمة المرور الخاصة بك" required>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">تسجيل الدخول</button>
             
             <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
-                Don't have an account? <a href="register.php" style="color: var(--primary); font-weight: 600;">Register here</a>
+                ليس لديك حساب؟ <a href="register.php" style="color: var(--primary); font-weight: 600;">سجل الآن من هنا</a>
             </p>
         </form>
     </div>

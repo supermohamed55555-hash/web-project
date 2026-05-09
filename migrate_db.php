@@ -2,13 +2,14 @@
 require_once 'config.php';
 
 try {
-    $conn->exec("ALTER TABLE blood_requests ADD COLUMN latitude DECIMAL(10, 8), ADD COLUMN longitude DECIMAL(11, 8)");
-    echo "Database updated successfully: Added latitude and longitude columns.\n";
+    // Add hospital_id and coordinate columns
+    $conn->exec("ALTER TABLE blood_requests 
+        ADD COLUMN IF NOT EXISTS hospital_id INT DEFAULT NULL AFTER user_id,
+        ADD COLUMN IF NOT EXISTS latitude DECIMAL(10, 8) DEFAULT NULL, 
+        ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8) DEFAULT NULL");
+        
+    echo "Database updated successfully: Added hospital_id, latitude, and longitude columns.\n";
 } catch (PDOException $e) {
-    if (strpos($e->getMessage(), 'Duplicate column name') !== false) {
-        echo "Columns already exist.\n";
-    } else {
-        echo "Error updating database: " . $e->getMessage() . "\n";
-    }
+    echo "Error updating database: " . $e->getMessage() . "\n";
 }
 ?>
