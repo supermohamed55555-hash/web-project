@@ -1,7 +1,6 @@
 <?php 
 session_start();
 require_once 'config.php';
-include 'includes/header.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -38,6 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
+
+include 'includes/header.php';
 ?>
 
 <div class="auth-container">
