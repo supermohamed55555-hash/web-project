@@ -12,13 +12,20 @@ try {
     foreach ($admin_emails as $email) {
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
+        $existing = $stmt->fetch();
         
-        if ($stmt->rowCount() == 0) {
+        if (!$existing) {
             $insert = $conn->prepare("INSERT INTO users (full_name, email, password, phone, blood_type, city, role) VALUES (?, ?, ?, '01000000000', 'O+', 'Cairo', 'admin')");
-            $insert->execute(["Admin User", $email, $default_password]);
+            if ($insert->execute(["Admin User", $email, $default_password])) {
+                echo "<p>تم إنشاء حساب الأدمن للإيميل: $email بكلمة مرور 123456</p>";
+            } else {
+                echo "<p>فشل إنشاء حساب للإيميل: $email</p>";
+            }
         } else {
             $update = $conn->prepare("UPDATE users SET role = 'admin' WHERE email = ?");
-            $update->execute([$email]);
+            if ($update->execute([$email])) {
+                echo "<p>تم ترقية الحساب للإيميل: $email ليصبح أدمن</p>";
+            }
         }
     }
 
