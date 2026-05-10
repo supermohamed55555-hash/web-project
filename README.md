@@ -1,1 +1,1 @@
-https://web-project-production-71c0.up.railway.app/login.php
+https://web-project-production-71c0.up.railway.app/index.php
