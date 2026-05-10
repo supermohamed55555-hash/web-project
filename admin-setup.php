@@ -2,10 +2,7 @@
 require_once 'config.php';
 
 try {
-    // 1. Add role column if not exists
-    $conn->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user' AFTER password");
-    
-    // 2. The Admin Emails List
+    // 1. The Admin Emails List
     $admin_emails = [
         'superabdo22222@gmail.com',
         'mhmhmhmhmh770@gmail.com'
