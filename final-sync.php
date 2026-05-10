@@ -5,9 +5,7 @@ require_once 'includes/hospitals.php';
 header('Content-Type: text/html; charset=utf-8');
 
 try {
-    // 1. Update Schema: Ensure blood_requests has hospital_id column
-    $conn->exec("ALTER TABLE blood_requests ADD COLUMN IF NOT EXISTS hospital_id INT AFTER user_id");
-
+    // 1. Update Schema: Ensure blood_requests has hospital_id column (Already done via index.php)
     // 2. Clear and Refill Hospitals Table (Source of Truth)
     $conn->exec("DROP TABLE IF EXISTS hospitals");
     $conn->exec("CREATE TABLE hospitals (
