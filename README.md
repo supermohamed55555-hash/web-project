@@ -1,5 +1,4 @@
-https://web-project-production-71c0.up.railway.app/index.php
-#  LifeStream - Blood Donation Management System
+# LifeStream - Blood Donation Management System
 
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-00000f?style=for-the-badge&logo=mysql&logoColor=white)
@@ -11,20 +10,38 @@ https://web-project-production-71c0.up.railway.app/index.php
 
 ---
 
-##  Key Features
+## Key Features
 
--  **Verified Hospital Mapping:** Uses a pre-verified dataset of hospitals with exact coordinates.
--  **Interactive Leaflet Map:** Real-time visualization of emergency requests.
--  **Urgency System:** Categorizes requests based on blood type and urgency level.
--  **Role-Based Access Control (RBAC):** Distinct dashboards for **Admins** and **Users**.
--  **Secure Authentication:** Built with **PHP PDO** and **Prepared Statements** to prevent SQL Injection.
--  **Fully Responsive UI:** Modern "Glassmorphism" design that works on all devices.
--  **RTL Support:** Full native support for Arabic language and right-to-left layouts.
--  **Admin Insights:** Real-time statistics on requests, donor availability, and hospital load.
+- **Verified Hospital Mapping:** Uses a pre-verified dataset of hospitals with exact coordinates.
+- **Interactive Leaflet Map:** Real-time visualization of emergency requests.
+- **Urgency System:** Categorizes requests based on blood type and urgency level.
+- **Role-Based Access Control (RBAC):** Distinct dashboards for **Admins** and **Users**.
+- **Secure Authentication:** Built with **PHP PDO** and **Prepared Statements** to prevent SQL Injection.
+- **Fully Responsive UI:** Modern "Glassmorphism" design that works on all devices.
+- **RTL Support:** Full native support for Arabic language and right-to-left layouts.
+- **Admin Insights:** Real-time statistics on requests, donor availability, and hospital load.
 
 ---
 
-##  Tech Stack
+## 🔐 Security Features
+
+This project implements a multi-layered security architecture:
+
+| Layer | Implementation |
+|-------|---------------|
+| **SQL Injection Prevention** | 100% of queries use PDO Prepared Statements |
+| **XSS Protection** | Output sanitization + `htmlspecialchars()` on all user input |
+| **Security Headers** | `X-Frame-Options`, `X-Content-Type-Options`, `X-XSS-Protection`, `Content-Security-Policy`, `Referrer-Policy` via `includes/security.php` |
+| **Input Validation** | Server-side validation on all forms (blood type enum, email format, password length, hospital ID) via `includes/validate.php` |
+| **CSRF Protection** | Token-based CSRF validation on every POST form via `includes/csrf.php` |
+| **Brute Force Prevention** | Session-based Rate Limiting — max 5 failed login attempts per 15 minutes via `includes/rate_limit.php` |
+| **Audit Logging** | Every critical action (login, logout, register, blood request) is recorded with user, IP, and timestamp in `audit_logs` table |
+| **Password Hashing** | Uses `password_hash()` (bcrypt) for secure credential storage |
+| **Session Security** | Role-based session validation on every administrative page |
+
+---
+
+## Tech Stack
 
 - **Backend:** PHP 8.x
 - **Database:** MySQL (Relational)
@@ -35,33 +52,40 @@ https://web-project-production-71c0.up.railway.app/index.php
 
 ---
 
-##  Smart Map Logic (Technical Overview)
+## Smart Map Logic (Technical Overview)
 
 Unlike traditional systems that rely on inaccurate user GPS data, **LifeStream** implements a **Source of Truth** architecture:
 
-1.  **Verified Dataset:** A curated list of hospitals (`hospitals` table) stores precise Latitude/Longitude coordinates verified via Google Places.
-2.  **The Join Logic:** When a request is created, it is linked via `hospital_id`. The mapping engine performs an `INNER JOIN` to fetch the verified coordinates, ensuring the marker is pinned exactly on the hospital building.
-3.  **Privacy Protection:** User locations are never stored or exposed; only the destination hospital is mapped to protect patient privacy.
+1. **Verified Dataset:** A curated list of hospitals (`hospitals` table) stores precise Latitude/Longitude coordinates verified via Google Places.
+2. **The Join Logic:** When a request is created, it is linked via `hospital_id`. The mapping engine performs an `INNER JOIN` to fetch the verified coordinates, ensuring the marker is pinned exactly on the hospital building.
+3. **Privacy Protection:** User locations are never stored or exposed; only the destination hospital is mapped to protect patient privacy.
 
 ---
 
-##  Folder Structure
+## Folder Structure
 
 ```text
 blood-app/
-├── admin/              # Admin-only pages (Dashboard, Requests, Users)
-├── assets/             # CSS, Images, and Client-side JS
-├── includes/           # Core components (Header, Footer, DB Config)
-├── config.php          # Database connection using Environment Variables
-├── map-view.php        # The Interactive Map interface
-├── request-blood.php   # Blood request submission form
-├── final-sync.php      # Database migration & verification script
-└── index.php           # Landing page
+├── admin/                  # Admin-only pages (Dashboard, Requests, Users, Audit Log)
+├── assets/                 # CSS, Images, and Client-side JS
+├── includes/               # Core components
+│   ├── security.php        # Security headers (applied globally)
+│   ├── validate.php        # Input validation & sanitization helpers
+│   ├── csrf.php            # CSRF token generation & verification
+│   ├── rate_limit.php      # Brute force login protection
+│   ├── audit.php           # Audit logging helper
+│   ├── header.php
+│   └── footer.php
+├── config.php              # Database connection using Environment Variables
+├── map-view.php            # The Interactive Map interface
+├── request-blood.php       # Blood request submission form
+├── final-sync.php          # Database migration & verification script
+└── index.php               # Landing page
 ```
 
 ---
 
-##  Installation & Setup
+## Installation & Setup
 
 ### 1. Clone the repository
 ```bash
@@ -84,26 +108,17 @@ Edit `config.php` or set the following Environment Variables:
 
 ---
 
-##  Why Leaflet instead of Google Maps?
+## Why Leaflet instead of Google Maps?
 
 We intentionally chose **Leaflet.js** for this project because:
--  **Open Source:** No expensive API keys or usage quotas.
--  **Performance:** Extremely lightweight and fast on mobile devices.
--  **Privacy:** No tracking or data collection by third-party giants.
--  **Customization:** Full control over map tiles and pulse-effect markers.
+- **Open Source:** No expensive API keys or usage quotas.
+- **Performance:** Extremely lightweight and fast on mobile devices.
+- **Privacy:** No tracking or data collection by third-party giants.
+- **Customization:** Full control over map tiles and pulse-effect markers.
 
 ---
 
-##  Security Features
-
-- **SQL Injection Prevention:** 100% of queries use PDO Prepared Statements.
-- **XSS Protection:** Output sanitization for all user-generated content.
-- **Session Security:** Role-based session validation on every administrative page.
-- **Password Hashing:** Uses `password_hash()` (bcrypt) for secure credential storage.
-
----
-
-##  Future Improvements
+## Future Improvements
 
 - [ ] SMS/WhatsApp Notifications for nearby donors.
 - [ ] Integration with Ministry of Health official APIs.
@@ -112,7 +127,7 @@ We intentionally chose **Leaflet.js** for this project because:
 
 ---
 
-##  Contributors
+## Contributors
 - **Mohamed Hamdy** - Lead Developer
 
 ---
