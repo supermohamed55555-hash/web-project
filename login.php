@@ -1,6 +1,10 @@
 <?php 
 session_start();
 require_once 'config.php';
+require_once 'includes/validate.php';
+require_once 'includes/rate_limit.php';
+require_once 'includes/csrf.php';
+require_once 'includes/audit.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -12,28 +16,47 @@ $message = "";
 $messageType = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-
-    if (empty($email) || empty($password)) {
-        $message = "يرجى إدخال البريد الإلكتروني وكلمة المرور.";
+    verifyCsrfToken();
+    $limitMessage = checkRateLimit();
+    if ($limitMessage) {
+        $message = $limitMessage;
         $messageType = "error";
     } else {
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        $rules = [
+            'email' => ['email' => true],
+            'password' => ['password' => true]
+        ];
+        $validator = validate_input($_POST, $rules);
 
-        if ($user && password_verify($password, $user['password'])) {
-            // Authentication successful
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['role'] = $user['role'];
-            
-            header("Location: index.php");
-            exit();
-        } else {
-            $message = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        if (!$validator['success']) {
+            $message = implode('<br>', $validator['errors']);
             $messageType = "error";
+        } else {
+            $email = $validator['data']['email'];
+            $password = $validator['data']['password'];
+
+            $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // Authentication successful
+                resetLoginAttempts();
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['email'] = $user['email']; // Set email in session for audit logging
+                
+                logAction($conn, 'LOGIN', 'User logged in');
+                
+                header("Location: index.php");
+                exit();
+            } else {
+                recordFailedAttempt();
+                logAction($conn, 'LOGIN_FAILED', 'Wrong password for: ' . $email);
+                $message = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+                $messageType = "error";
+            }
         }
     }
 }
@@ -52,6 +75,7 @@ include 'includes/header.php';
         <?php endif; ?>
 
         <form action="login.php" method="POST">
+            <?= csrfField() ?>
             <div class="form-group">
                 <label>البريد الإلكتروني</label>
                 <input type="email" name="email" class="form-control" placeholder="example@mail.com" required>

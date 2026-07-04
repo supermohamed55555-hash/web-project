@@ -38,6 +38,7 @@ $users = $conn->query("SELECT * FROM users ORDER BY id DESC")->fetchAll();
         <a href="requests.php" class="admin-nav-link"><i class="fas fa-heartbeat"></i> طلبات الدم</a>
         <a href="hospitals.php" class="admin-nav-link"><i class="fas fa-hospital"></i> المستشفيات</a>
         <a href="users.php" class="admin-nav-link active"><i class="fas fa-users"></i> المستخدمين</a>
+        <a href="audit-log.php" class="admin-nav-link"><i class="fas fa-history"></i> سجل العمليات</a>
         <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 1rem 0;">
         <a href="../index.php" class="admin-nav-link"><i class="fas fa-external-link-alt"></i> عرض الموقع</a>
     </nav>

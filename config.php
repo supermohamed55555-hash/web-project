@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/includes/security.php';
 /**
  * DATABASE CONFIGURATION
  * Using PDO for secure prepared statements
@@ -21,6 +22,16 @@ try {
     
     // Set default fetch mode to associative array
     $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    // Ensure audit_logs table exists
+    $conn->exec("CREATE TABLE IF NOT EXISTS audit_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT DEFAULT NULL,
+        user_email VARCHAR(255) DEFAULT NULL,
+        action VARCHAR(100) NOT NULL,
+        details TEXT DEFAULT NULL,
+        ip_address VARCHAR(45) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB;");
     
 } catch(PDOException $e) {
     // If connection fails, stop and show error

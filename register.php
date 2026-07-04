@@ -1,45 +1,61 @@
 <?php 
 require_once 'config.php';
+require_once 'includes/validate.php';
+require_once 'includes/csrf.php';
+require_once 'includes/audit.php';
 include 'includes/header.php';
 
 $message = "";
 $messageType = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Collect and sanitize input
-    $full_name = trim($_POST['full_name']);
-    $email     = trim($_POST['email']);
-    $password  = $_POST['password'];
-    $phone     = trim($_POST['phone']);
-    $blood_type= $_POST['blood_type'];
-    $city      = trim($_POST['city']);
+    verifyCsrfToken();
+    $rules = [
+        'email' => ['email' => true],
+        'password' => ['password' => true],
+        'blood_type' => ['blood_type' => true]
+    ];
+    $validator = validate_input($_POST, $rules);
 
-    // Simple Validation
-    if (empty($full_name) || empty($email) || empty($password)) {
-        $message = "يرجى ملء جميع الحقول المطلوبة.";
+    if (!$validator['success']) {
+        $message = implode('<br>', $validator['errors']);
         $messageType = "error";
     } else {
-        // Check if email already exists
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        
-        if ($stmt->rowCount() > 0) {
-            $message = "هذا البريد الإلكتروني مسجل بالفعل.";
+        $full_name = $validator['data']['full_name'];
+        $email     = $validator['data']['email'];
+        $password  = $validator['data']['password'];
+        $phone     = $validator['data']['phone'];
+        $blood_type= $validator['data']['blood_type'];
+        $city      = $validator['data']['city'];
+
+        if (empty($full_name) || empty($email) || empty($password) || empty($phone) || empty($city)) {
+            $message = "يرجى ملء جميع الحقول المطلوبة.";
             $messageType = "error";
         } else {
-            // Hash password and insert user
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            // Check if email already exists
+            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$email]);
             
-            try {
-                $sql = "INSERT INTO users (full_name, email, password, phone, blood_type, city) VALUES (?, ?, ?, ?, ?, ?)";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([$full_name, $email, $hashed_password, $phone, $blood_type, $city]);
-                
-                $message = "تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.";
-                $messageType = "success";
-            } catch (PDOException $e) {
-                $message = "خطأ: " . $e->getMessage();
+            if ($stmt->rowCount() > 0) {
+                $message = "هذا البريد الإلكتروني مسجل بالفعل.";
                 $messageType = "error";
+            } else {
+                // Hash password and insert user
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                
+                try {
+                    $sql = "INSERT INTO users (full_name, email, password, phone, blood_type, city) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([$full_name, $email, $hashed_password, $phone, $blood_type, $city]);
+                    
+                    logAction($conn, 'REGISTER', 'New user: ' . $email);
+                    
+                    $message = "تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.";
+                    $messageType = "success";
+                } catch (PDOException $e) {
+                    $message = "خطأ: " . $e->getMessage();
+                    $messageType = "error";
+                }
             }
         }
     }
@@ -57,6 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
 
         <form action="register.php" method="POST">
+            <?= csrfField() ?>
             <div class="form-group">
                 <label>الاسم الكامل</label>
                 <input type="text" name="full_name" class="form-control" placeholder="أدخل اسمك بالكامل" required>

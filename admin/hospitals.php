@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once '../config.php';
+require_once '../includes/validate.php';
+require_once '../includes/csrf.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.php");
@@ -9,10 +11,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 $message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name_ar = $_POST['name_ar'];
-    $lat = $_POST['lat'];
-    $lng = $_POST['lng'];
-    $city = $_POST['city'];
+    verifyCsrfToken();
+    $validator = validate_input($_POST, []);
+    
+    $name_ar = $validator['data']['name_ar'];
+    $lat = $validator['data']['lat'];
+    $lng = $validator['data']['lng'];
+    $city = $validator['data']['city'];
 
     $stmt = $conn->prepare("INSERT INTO hospitals (name_ar, city, latitude, longitude) VALUES (?, ?, ?, ?)");
     if ($stmt->execute([$name_ar, $city, $lat, $lng])) {
@@ -51,6 +56,7 @@ $hospitals = $conn->query("SELECT * FROM hospitals ORDER BY id DESC")->fetchAll(
         <a href="requests.php" class="admin-nav-link"><i class="fas fa-heartbeat"></i> طلبات الدم</a>
         <a href="hospitals.php" class="admin-nav-link active"><i class="fas fa-hospital"></i> المستشفيات</a>
         <a href="users.php" class="admin-nav-link"><i class="fas fa-users"></i> المستخدمين</a>
+        <a href="audit-log.php" class="admin-nav-link"><i class="fas fa-history"></i> سجل العمليات</a>
         <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 1rem 0;">
         <a href="../index.php" class="admin-nav-link"><i class="fas fa-external-link-alt"></i> عرض الموقع</a>
     </nav>
@@ -63,6 +69,7 @@ $hospitals = $conn->query("SELECT * FROM hospitals ORDER BY id DESC")->fetchAll(
         <h3>إضافة مستشفى جديد</h3>
         <?php if ($message): ?> <p style="color: green;"><?= $message ?></p> <?php endif; ?>
         <form method="POST" class="form-grid">
+            <?= csrfField() ?>
             <input type="text" name="name_ar" placeholder="اسم المستشفى بالعربي" required class="form-control">
             <input type="text" name="city" placeholder="المدينة" required class="form-control">
             <input type="text" name="lat" placeholder="خط العرض (Latitude)" required class="form-control">

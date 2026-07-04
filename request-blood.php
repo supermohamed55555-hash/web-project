@@ -2,6 +2,9 @@
 session_start();
 require_once 'config.php';
 require_once 'includes/hospitals.php';
+require_once 'includes/validate.php';
+require_once 'includes/csrf.php';
+require_once 'includes/audit.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -17,32 +20,45 @@ $message = "";
 $messageType = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $blood_type  = $_POST['blood_type'];
-    $hospital_id = (int)$_POST['hospital_id'];
-    $msg         = trim($_POST['message']);
-    $user_id     = $_SESSION['user_id'];
+    verifyCsrfToken();
+    $rules = [
+        'blood_type' => ['blood_type' => true],
+        'hospital_id' => ['hospital_id' => true]
+    ];
+    $validator = validate_input($_POST, $rules);
 
-    // Verify hospital exists and get its info
-    $h_info = get_hospital_by_id($hospital_id);
+    if (!$validator['success']) {
+        $message = implode('<br>', $validator['errors']);
+        $messageType = "error";
+    } else {
+        $blood_type  = $validator['data']['blood_type'];
+        $hospital_id = $validator['data']['hospital_id'];
+        $msg         = isset($validator['data']['message']) ? trim($validator['data']['message']) : '';
+        $user_id     = $_SESSION['user_id'];
 
-    if ($h_info && !empty($blood_type)) {
-        $hospital_name = $h_info['name_ar'];
-        $city = $h_info['city'];
-        
-        try {
-            // Save hospital_id to link with coordinates dynamically
-            $stmt = $conn->prepare("INSERT INTO blood_requests (user_id, hospital_id, blood_type, hospital_name, city, message, status) VALUES (?, ?, ?, ?, ?, ?, 'Pending')");
-            if ($stmt->execute([$user_id, $hospital_id, $blood_type, $hospital_name, $city, $msg])) {
-                $message = "تم نشر طلب التبرع بنجاح! <a href='map-view.php'>شاهده على الخريطة</a>";
-                $messageType = "success";
+        // Verify hospital exists and get its info
+        $h_info = get_hospital_by_id($hospital_id);
+
+        if ($h_info && !empty($blood_type)) {
+            $hospital_name = $h_info['name_ar'];
+            $city = $h_info['city'];
+            
+            try {
+                // Save hospital_id to link with coordinates dynamically
+                $stmt = $conn->prepare("INSERT INTO blood_requests (user_id, hospital_id, blood_type, hospital_name, city, message, status) VALUES (?, ?, ?, ?, ?, ?, 'Pending')");
+                if ($stmt->execute([$user_id, $hospital_id, $blood_type, $hospital_name, $city, $msg])) {
+                    logAction($conn, 'BLOOD_REQUEST', 'Blood type: ' . $blood_type);
+                    $message = "تم نشر طلب التبرع بنجاح! <a href='map-view.php'>شاهده على الخريطة</a>";
+                    $messageType = "success";
+                }
+            } catch (PDOException $e) {
+                $message = "Error: " . $e->getMessage();
+                $messageType = "error";
             }
-        } catch (PDOException $e) {
-            $message = "Error: " . $e->getMessage();
+        } else {
+            $message = "يرجى اختيار فصيلة الدم والمستشفى.";
             $messageType = "error";
         }
-    } else {
-        $message = "يرجى اختيار فصيلة الدم والمستشفى.";
-        $messageType = "error";
     }
 }
 ?>
@@ -59,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endif; ?>
 
             <form method="POST">
+                <?= csrfField() ?>
                 <div class="form-group" style="margin-bottom: 1.5rem;">
                     <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">فصيلة الدم المطلوبة</label>
                     <select name="blood_type" class="form-control" required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ddd;">
